@@ -1,0 +1,6 @@
+{
+  "name": "Triangle Centers Explorer",
+  "description": "삼각형의 모양을 직접 변형하며 내심, 외심, 무게중심의 작동 원리와 성질을 시각적으로 학습하는 대화형 도구",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
