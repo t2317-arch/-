@@ -22,38 +22,6 @@ export default function App() {
   const [showConstruction, setShowConstruction] = useState<boolean>(true);
   const [showCircles, setShowCircles] = useState<boolean>(true);
 
-  // Challenges list with state
-  const [challenges, setChallenges] = useState<Challenge[]>([
-    {
-      id: 'challenge-right',
-      title: '직각삼각형의 비밀 풀기',
-      description: '한 각을 약 90도 근처로 드래그하여 직각삼각형을 만들고 외심 O의 위치 변화를 살펴보세요.',
-      successCondition: '성공! 직각삼각형이 완성되었습니다. 이때 외심 O가 대변(빗변)의 한가운데(중점)에 정확하게 올라타는 것을 보셨나요? 이는 고등학교 기하와 원의 성질에서 가장 핵심이 되는 법칙이랍니다!',
-      isCompleted: false,
-    },
-    {
-      id: 'challenge-equilateral',
-      title: '완벽한 대칭 (정삼각형)',
-      description: '세 변의 길이가 모두 동일한 완벽한 정삼각형을 조절하여 만들어 보세요.',
-      successCondition: '성공! 대칭적인 정삼각형이 되었습니다. 이제 내심(I), 외심(O), 무게중심(G), 수심(H)이 거짓말처럼 완벽하게 한 곳으로 합쳐져 한 점이 되는 놀라운 상태를 감상해 보세요!',
-      isCompleted: false,
-    },
-    {
-      id: 'challenge-obtuse',
-      title: '외심 탈출! (둔각삼각형 만들기)',
-      description: '한 각도가 90도를 훌쩍 넘는 둔각삼각형을 만들어 외심 O의 위치를 살펴보세요.',
-      successCondition: '성공! 한 내각이 90도를 넘어 둔각삼각형이 되었습니다. 수직이등분선들이 삼각형 외부에서 교차하여 외심 O가 삼각형 바깥(외부)으로 탈출하는 흥미로운 형태를 확인해 보세요!',
-      isCompleted: false,
-    },
-    {
-      id: 'challenge-isosceles',
-      title: '일렬종대 중심 (이등변삼각형)',
-      description: '좌우 대칭 형태의 이등변삼각형 모양을 이뤄 보세요.',
-      successCondition: '성공! 이등변삼각형이 완성되었습니다. 꼭짓점 A에서 수직으로 내린 대칭축(오일러 선) 위에 모든 중심점들(I, O, G, H)이 자석처럼 세로로 가지런히 정렬되는 신비로운 현상입니다!',
-      isCompleted: false,
-    },
-  ]);
-
   // Handle vertex change from canvas dragging
   const handleVertexChange = useCallback((vertex: 'A' | 'B' | 'C', newPoint: Point) => {
     setVertices((prev) => ({
@@ -100,19 +68,50 @@ export default function App() {
     setVertices(INITIAL_VERTICES);
   };
 
-  // Callback to update challenge completion in parent state
-  const handleChallengeComplete = useCallback((id: string, completed: boolean) => {
-    setChallenges((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, isCompleted: completed } : c))
-    );
-  }, []);
-
   // Compute metrics & centers for active values
   const metrics = getMetrics(vertices.A, vertices.B, vertices.C);
   const centroid = getCentroid(vertices.A, vertices.B, vertices.C);
   const { center: incenter, r: inradius } = getIncenter(vertices.A, vertices.B, vertices.C);
   const { center: circumcenter, R: circumradius } = getCircumcenter(vertices.A, vertices.B, vertices.C);
   const orthocenter = getOrthocenter(vertices.A, vertices.B, vertices.C);
+
+  // Compute challenge completion status dynamically from current metrics
+  const isRight = metrics.triangleType === 'right';
+  const isEquilateral = metrics.specialType === 'equilateral';
+  const maxAngle = Math.max(metrics.angleA, metrics.angleB, metrics.angleC);
+  const isObtuse = maxAngle > 95;
+  const isIsosceles = metrics.specialType === 'isosceles' || metrics.specialType === 'equilateral';
+
+  const challenges: Challenge[] = [
+    {
+      id: 'challenge-right',
+      title: '직각삼각형의 비밀 풀기',
+      description: '한 각을 약 90도 근처로 드래그하여 직각삼각형을 만들고 외심 O의 위치 변화를 살펴보세요.',
+      successCondition: '성공! 직각삼각형이 완성되었습니다. 이때 외심 O가 대변(빗변)의 한가운데(중점)에 정확하게 올라타는 것을 보셨나요? 이는 고등학교 기하와 원의 성질에서 가장 핵심이 되는 법칙이랍니다!',
+      isCompleted: isRight,
+    },
+    {
+      id: 'challenge-equilateral',
+      title: '완벽한 대칭 (정삼각형)',
+      description: '세 변의 길이가 모두 동일한 완벽한 정삼각형을 조절하여 만들어 보세요.',
+      successCondition: '성공! 대칭적인 정삼각형이 되었습니다. 이제 내심(I), 외심(O), 무게중심(G), 수심(H)이 거짓말처럼 완벽하게 한 곳으로 합쳐져 한 점이 되는 놀라운 상태를 감상해 보세요!',
+      isCompleted: isEquilateral,
+    },
+    {
+      id: 'challenge-obtuse',
+      title: '외심 탈출! (둔각삼각형 만들기)',
+      description: '한 각도가 90도를 훌쩍 넘는 둔각삼각형을 만들어 외심 O의 위치를 살펴보세요.',
+      successCondition: '성공! 한 내각이 90도를 넘어 둔각삼각형이 되었습니다. 수직이등분선들이 삼각형 외부에서 교차하여 외심 O가 삼각형 바깥(외부)으로 탈출하는 흥미로운 형태를 확인해 보세요!',
+      isCompleted: isObtuse,
+    },
+    {
+      id: 'challenge-isosceles',
+      title: '일렬종대 중심 (이등변삼각형)',
+      description: '좌우 대칭 형태의 이등변삼각형 모양을 이뤄 보세요.',
+      successCondition: '성공! 이등변삼각형이 완성되었습니다. 꼭짓점 A에서 수직으로 내린 대칭축(오일러 선) 위에 모든 중심점들(I, O, G, H)이 자석처럼 세로로 가지런히 정렬되는 신비로운 현상입니다!',
+      isCompleted: isIsosceles,
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-[#f1f5f9] p-4 sm:p-6 lg:p-8 font-sans selection:bg-indigo-100 select-none">
@@ -290,9 +289,7 @@ export default function App() {
               />
 
               <ChallengePanel
-                metrics={metrics}
                 challenges={challenges}
-                onChallengeComplete={handleChallengeComplete}
               />
             </div>
           </div>

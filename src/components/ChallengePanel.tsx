@@ -1,39 +1,14 @@
-import React, { useEffect } from 'react';
-import { GeometryMetrics, Challenge } from '../types';
+import React from 'react';
+import { Challenge } from '../types';
 import { CheckCircle2, Award, Circle, Sparkles, Trophy } from 'lucide-react';
 
 interface ChallengePanelProps {
-  metrics: GeometryMetrics;
   challenges: Challenge[];
-  onChallengeComplete: (id: string, completed: boolean) => void;
 }
 
 export const ChallengePanel: React.FC<ChallengePanelProps> = ({
-  metrics,
   challenges,
-  onChallengeComplete,
 }) => {
-  // Check conditions in real-time
-  useEffect(() => {
-    // 1. Equilateral
-    const isEquilateral = metrics.specialType === 'equilateral';
-    onChallengeComplete('challenge-equilateral', isEquilateral);
-
-    // 2. Right Triangle
-    const isRight = metrics.triangleType === 'right';
-    onChallengeComplete('challenge-right', isRight);
-
-    // 3. Obtuse Triangle
-    // Ensure it's genuinely obtuse (e.g., max angle is > 95 degrees to be safe)
-    const maxAngle = Math.max(metrics.angleA, metrics.angleB, metrics.angleC);
-    const isObtuse = maxAngle > 95;
-    onChallengeComplete('challenge-obtuse', isObtuse);
-
-    // 4. Isosceles
-    const isIsosceles = metrics.specialType === 'isosceles' || metrics.specialType === 'equilateral';
-    onChallengeComplete('challenge-isosceles', isIsosceles);
-  }, [metrics, onChallengeComplete]);
-
   const completedCount = challenges.filter((c) => c.isCompleted).length;
   const totalCount = challenges.length;
   const progressPercent = Math.round((completedCount / totalCount) * 100);
